@@ -19,10 +19,14 @@ import re
 
 import requests
 import numpy
-import cv2
 import begin
 from begin import formatters
 
+try:
+    import cv2
+except ImportError:
+    print("Please install OpenCV and configure cv2 for python")
+    raise
 
 class IPCamera(object):
     "The IPCamera object downloads, decodes, and yields jpg images @ fps"

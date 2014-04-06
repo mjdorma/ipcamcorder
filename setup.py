@@ -4,10 +4,16 @@ import re
 import sys
 
 
+try:
+    import cv2
+except ImportError:
+    print("Please install OpenCV and configure cv2 for python")
+    raise
+
 setup(
     name="ipcamcorder",
     version='0.0.1',
-    packages=['camcorder'],
+    py_modules=['ipcamcorder'],
     zip_safe=False,
     author="Michael Dorman",
     author_email="mjdorma@gmail.com",
@@ -36,5 +42,5 @@ setup(
             'ipcamcorder = ipcamcorder:main.start',
             ],
     },
-    install_requires=['requests', 'begins', 'numpy', 'cv2']
+    install_requires=['requests', 'begins', 'numpy']
 )
