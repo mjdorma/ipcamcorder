@@ -15,6 +15,7 @@ from urllib import urlopen
 from threading import Thread
 from threading import Event 
 from datetime import datetime
+from threading import Lock
 import re
 
 import requests
@@ -27,6 +28,9 @@ try:
 except ImportError:
     print("Please install OpenCV and configure cv2 for python")
     raise
+
+CV2_LOCK = Lock()
+
 
 class IPCamera(object):
     "The IPCamera object downloads, decodes, and yields jpg images @ fps"
@@ -175,7 +179,8 @@ class Recorder(Thread):
         while not self.quit.is_set():
             # Cleanup cache if required.
             names = [n for n in os.listdir(self.outdir) if pattern.match(n)]
-            print(names)
+            if self.verbose and names:
+                print("Names: %s" % names)
             rm_count = len(names) - self.cache
             if rm_count > 0:
                 names.sort()
@@ -199,11 +204,13 @@ class Recorder(Thread):
         image = self.camera.next_frame()
         height, width, _ = image.shape
         size = (width, height)
-        codec = cv2.cv.CV_FOURCC('D', 'I', 'V', 'X')
+        with CV2_LOCK:
+            codec = cv2.cv.CV_FOURCC('D', 'I', 'V', 'X')
         
         for filepath in self.filepath_generator():
             print("Recording to %s" % (filepath))
-            video = cv2.VideoWriter(filepath, codec, self.fps, size)
+            with CV2_LOCK:
+                video = cv2.VideoWriter(filepath, codec, self.fps, size)
             stime = time.time()
             for frame in self.camera:
                 video.write(frame)
